@@ -32,7 +32,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 if ($user && $user['password'] === $password) {
     // セッション開始して、ログイン成功
     session_start();
-    $_SESSION['user_id'] = $user['user_id']; // ユーザーIDをセッションに保存
+    $_SESSION['user_id'] = $user['id']; // ユーザーIDをセッションに保存
     $_SESSION['username'] = $user['username']; // ユーザー名も保存
     echo 'ログイン成功';
 } else {

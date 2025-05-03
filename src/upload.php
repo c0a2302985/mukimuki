@@ -1,12 +1,21 @@
 <?php
+session_start(); // セッション開始（これが一番上）
+
+// ログイン済みかどうか確認
+if (!isset($_SESSION['user_id'])) {
+    die('ログインしていません。');
+}
+
+$user_id = $_SESSION['user_id']; // ログイン中のユーザーIDを取得
+
 // DB接続情報
 $host = 'db'; // docker-composeのサービス名
 $dbname = 'myapp';
 $user = 'myuser';
 $pass = 'mypass';
 
-// ユーザーID（仮に1とする、実際にはログインユーザーのIDを取得）
-$user_id = 1;
+// // ユーザーID（仮に1とする、実際にはログインユーザーのIDを取得）
+// $user_id = 1;
 
 // 画像アップロード処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {

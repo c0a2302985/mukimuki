@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 // DB接続情報
 $host = 'db'; // docker-composeのサービス名
 $dbname = 'myapp';
@@ -31,10 +33,10 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 // ユーザーが存在し、パスワードが一致するか確認
 if ($user && $user['password'] === $password) {
     // セッション開始して、ログイン成功
-    session_start();
     $_SESSION['user_id'] = $user['id']; // ユーザーIDをセッションに保存
     $_SESSION['username'] = $user['username']; // ユーザー名も保存
-    echo 'ログイン成功';
+    header('Location: top.php');
+    exit;
 } else {
     // ログイン失敗
     echo 'ユーザー名またはパスワードが間違っています';

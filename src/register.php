@@ -1,4 +1,6 @@
 <?php
+session_start(); // セッション開始
+
 // DB接続情報
 $host = 'db'; // docker-composeのサービス名
 $dbname = 'myapp';
@@ -31,7 +33,12 @@ $result = $stmt->execute([
 ]);
 
 if ($result) {
-    echo '登録成功';
+    // 登録成功 → ユーザー情報を取得してセッションに保存 → top.phpへ遷移
+    $user_id = $pdo->lastInsertId();
+    $_SESSION['user_id'] = $user_id;
+    $_SESSION['username'] = $username;
+    header('Location: top.php');
+    exit;
 } else {
     echo '登録失敗';
 }

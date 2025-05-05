@@ -56,80 +56,119 @@ class Database
     **********************************************************/
     public function     __destruct()
     {
-        // pass
+        return;
     }
     
     /**********************************************************
       関数  ：bindParams
       機能  ：実行時のバインド処理
-      引数  ：parms             [IN] バインドする内容
+      引数  ：params             [IN] バインドする内容
       戻り値：なし
-      備考  ：
+      備考  ：必要に応じてエラー処理を修正してください。
     **********************************************************/
-    private function    bindParams(array parms = [])
+    private function    bindParams(array $params = [])
     {
-    
+        foreach ($params as $key => $param)
+        {
+            if (!is_array($param) || count($param) < 2)
+            {
+                // 以下例外処理例:
+                // throw new InvalidArgumentException("パラメータは ['値', 型] の形式で指定してください。key=$key");
+                exit();
+            }
+
+            [$value, $type] = $param;
+
+            if (is_int($key))
+            {
+                // プレースホルダが ? の場合
+                $this->stmt->bindValue($key + 1, $value, $type); 
+            }
+            else
+            {
+                // プレースホルダが :name の場合
+                $this->stmt->bindValue($key, $value, $type);
+            }
+        }
     }
     
     /**********************************************************
       関数  ：query
       機能  ：クエリの処理
       引数  ：sql                [IN] SQL文
-            ：parms              [IN] バインドする内容
-      戻り値：なし
+            ：params              [IN] バインドする内容
+      戻り値：実行済みのPDOStatement（fetch用などに使用可能）
       備考  ：
     **********************************************************/
-    public function     query($sql, array parms = [])
+    public function     query($sql, array $params = [])
     {
+        try
+        {
+            $this->stmt = $this->pdo->prepare($sql);
+            if (!empty($param))
+            {
+                $this->bindParams($params);   
+            }
+            $this->stmt->execute();
+            
+            return $this->stmt;
+        }
+        catch
+        {
+            exit();
+        }
+        
+        return      false;
+    }
     
+    /**********************************************************
+      関数  ：execute
+      機能  ：SQLの実行
+      引数  ：sql                [IN] SQL文
+            ：params              [IN] バインドする内容
+      戻り値：影響を受けた行数
+      備考  ：
+    **********************************************************/
+    public function     execute($sql, array $params = [])
+    {
+        $this->query($sql, $params);
+        
+        return      $this->stmt->rowCount();
     }
     
     /**********************************************************
       関数  ：fetch
       機能  ：実行結果の取得
       引数  ：sql                [IN] SQL文
-            ：parms              [IN] バインドする内容
+            ：params              [IN] バインドする内容
       戻り値：実行結果
-      備考  ：
+      備考  ：最初に見つかった1行分のデータ
     **********************************************************/
-    public function     fetch($sql, array parms = [])
+    public function     fetch($sql, array $params = [])
     {
-        return      $this->query($sql, $parms)->fetch();
+        return      $this->query($sql, $params)->fetch();
     }
     
     /**********************************************************
       関数  ：query
       機能  ：実行結果の取得
       引数  ：sql                [IN] SQL文
-            ：parms              [IN] バインドする内容
+            ：params              [IN] バインドする内容
       戻り値：実行結果
-      備考  ：
+      備考  ：全件の結果（連想配列の配列形式）
     **********************************************************/
-    public function     fetchAll($sql, array parms = [])
+    public function     fetchAll($sql, array $params = [])
     {
-        return      $this->query($sql, $parms)->fetchAll();
+        return      $this->query($sql, $params)->fetchAll();
     }
     
-    /**********************************************************
-      関数  ：query
-      機能  ：実行結果の取得
-      引数  ：sql                [IN] SQL文
-            ：parms              [IN] バインドする内容
-      戻り値：実行結果
-      備考  ：
-    **********************************************************/
-    public function     execute($sql, array parms = [])
-    {
-    
-    }
     
     /**********************************************************
-      関数  ：query
-      機能  ：実行結果の取得
-      引数  ：sql                [IN] SQL文
-            ：parms              [IN] バインドする内容
-      戻り値：実行結果
-      備考  ：
+      関数  ：rookback
+      機能  ：処理の巻き戻し
+      引数  ：
+      戻り値：
+      備考  ：成功可否（bool）
     **********************************************************/
     public function rollback() 
     {
@@ -137,9 +176,9 @@ class Database
     }
     
     
-    
-    
-    
+    /**********************************************************
+        いかにAPKに応じて関数を追加
+    **********************************************************/
     
     
     

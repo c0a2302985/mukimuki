@@ -113,7 +113,7 @@ class Database
             
             return $this->stmt;
         }
-        catch
+        catch(PDOException $e)
         {
             exit();
         }
@@ -164,7 +164,7 @@ class Database
     
     
     /**********************************************************
-      関数  ：rookback
+      関数  ：rollback
       機能  ：処理の巻き戻し
       引数  ：
       戻り値：

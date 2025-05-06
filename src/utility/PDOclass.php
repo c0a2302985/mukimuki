@@ -105,7 +105,7 @@ class Database
         try
         {
             $this->stmt = $this->pdo->prepare($sql);
-            if (!empty($param))
+            if (!empty($params))
             {
                 $this->bindParams($params);   
             }
@@ -150,7 +150,7 @@ class Database
     }
     
     /**********************************************************
-      関数  ：query
+      関数  ：fetchAll
       機能  ：実行結果の取得
       引数  ：sql                [IN] SQL文
             ：params              [IN] バインドする内容
@@ -182,7 +182,7 @@ class Database
     
     
     
-    /**********************************************************
+    /**********************************************************/
 
     public function lastInsertId() {
         return $this->pdo->lastInsertId();
@@ -196,7 +196,7 @@ class Database
         return $this->pdo->commit();
     }
     
-    **********************************************************/
+    /**********************************************************/
 
 }
 

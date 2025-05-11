@@ -1,6 +1,8 @@
 <?php
 session_start(); // セッション開始
 
+require_once 'utility/PDOclass.php'; // Database クラス読み込み
+
 // ログインしていない場合はアクセス拒否
 if (!isset($_SESSION['user_id'])) {
     die('ログインしていません。先にログインしてください。');
@@ -12,18 +14,15 @@ $dbname = 'myapp';
 $user = 'myuser';
 $pass = 'mypass';
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
-} catch (PDOException $e) {
-    die('DB接続失敗: ' . $e->getMessage());
-}
+// Database クラスのインスタンス生成
+$db = new Database($host, $dbname, $user, $pass);
 
 // 検索キーワードの取得
-$title_search = $_GET['title_search'] ?? ''; // タイトル検索
-$comment_search = $_GET['comment_search'] ?? ''; // コメント検索
-$username_search = $_GET['username_search'] ?? ''; // 作者名検索
+$title_search = $_GET['title_search'] ?? '';
+$comment_search = $_GET['comment_search'] ?? '';
+$username_search = $_GET['username_search'] ?? '';
 
-// 検索用SQL（それぞれのフィールドに対してLIKEを使用）
+// 検索用SQL
 $sql = "SELECT images.*, users.username FROM images 
         JOIN users ON images.user_id = users.id 
         WHERE images.title LIKE :title_search
@@ -31,16 +30,15 @@ $sql = "SELECT images.*, users.username FROM images
         AND users.username LIKE :username_search
         ORDER BY images.uploaded_at DESC";
 
-// SQLの準備と実行
-$stmt = $pdo->prepare($sql);
-$stmt->execute([
-    ':title_search' => '%' . $title_search . '%',
-    ':comment_search' => '%' . $comment_search . '%',
-    ':username_search' => '%' . $username_search . '%'
-]);
+// 実行用パラメータ（Databaseクラスは ['値', PDO::PARAM_*] の形式）
+$params = [
+    ':title_search' => ['%' . $title_search . '%', PDO::PARAM_STR],
+    ':comment_search' => ['%' . $comment_search . '%', PDO::PARAM_STR],
+    ':username_search' => ['%' . $username_search . '%', PDO::PARAM_STR],
+];
 
-// 検索結果を取得
-$images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// 実行して取得
+$images = $db->fetchAll($sql, $params);
 ?>
 
 <!DOCTYPE html>
@@ -71,7 +69,7 @@ $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <button type="submit">検索</button>
 </form>
 
-<!-- 検索条件の表示（空でない場合のみ表示） -->
+<!-- 検索条件の表示 -->
 <h3>検索条件:</h3>
 <p>
     <?php if (!empty($title_search)): ?>

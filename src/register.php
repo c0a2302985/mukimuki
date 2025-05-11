@@ -1,41 +1,38 @@
 <?php
 session_start(); // セッション開始
 
+require_once("utility/PDOclass.php");
+
 // DB接続情報
-$host = 'db'; // docker-composeのサービス名
+$host = 'db';
 $dbname = 'myapp';
 $user = 'myuser';
 $pass = 'mypass';
 
-// ユーザー入力（仮：POSTで受け取る）
+// ユーザー入力（POST）
 $username = $_POST['username'] ?? '';
 $password = $_POST['password'] ?? '';
 
-// 入力値チェック（ユーザーネームとパスワードが空でないか確認）
+// 入力値チェック
 if (empty($username) || empty($password)) {
     echo 'ユーザーネームとパスワードは必須です。';
-    exit; // 処理をここで終了
+    exit;
 }
 
 // DB接続
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
-} catch (PDOException $e) {
-    die('DB接続失敗: ' . $e->getMessage());
-}
+$db = new Database($host, $dbname, $user, $pass);
 
-// 登録SQL（プレーンなINSERT）
+// ユーザー登録処理
 $sql = "INSERT INTO users (username, password) VALUES (:username, :password)";
-$stmt = $pdo->prepare($sql);
-$result = $stmt->execute([
-    ':username' => $username,
-    ':password' => $password
-]);
+$params = [
+    ':username' => [$username, PDO::PARAM_STR],
+    ':password' => [$password, PDO::PARAM_STR],
+];
+$result = $db->execute($sql, $params);
 
-if ($result) {
-    // 登録成功 → ユーザー情報を取得してセッションに保存 → top.phpへ遷移
-    $user_id = $pdo->lastInsertId();
-    $_SESSION['user_id'] = $user_id;
+if ($result > 0) {
+    // 登録成功 → ID取得 → セッション保存 → topへ
+    $_SESSION['user_id'] = $db->lastInsertId();
     $_SESSION['username'] = $username;
     header('Location: top.php');
     exit;

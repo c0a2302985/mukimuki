@@ -1,6 +1,8 @@
 <?php
 session_start(); // セッション開始
 
+require_once 'utility/PDOclass.php'; // Database クラス読み込み
+
 // ログインしていない場合はアクセス拒否
 if (!isset($_SESSION['user_id'])) {
     die('ログインしていません。先にログインしてください。');
@@ -9,26 +11,24 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id']; // ログイン中のユーザーIDを取得
 
 // DB接続情報
-$host = 'db'; // docker-composeのサービス名
+$host = 'db';
 $dbname = 'myapp';
 $user = 'myuser';
 $pass = 'mypass';
 
-// DB接続
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
-} catch (PDOException $e) {
-    die('DB接続失敗: ' . $e->getMessage());
-}
+// Database クラスを使ってDB接続
+$db = new Database($host, $dbname, $user, $pass);
 
-// ログインユーザーの画像を取得するSQLクエリ
+// ログインユーザーの画像を取得するSQL
 $sql = "SELECT * FROM images WHERE user_id = :user_id ORDER BY uploaded_at DESC";
-$stmt = $pdo->prepare($sql);
-$stmt->execute([':user_id' => $user_id]);
 
-// 画像情報を表示
-$images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// 実行パラメータ
+$params = [
+    ':user_id' => [$user_id, PDO::PARAM_INT]
+];
 
+// 画像情報を取得
+$images = $db->fetchAll($sql, $params);
 ?>
 
 <!DOCTYPE html>

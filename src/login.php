@@ -1,44 +1,41 @@
 <?php
 session_start();
+require_once("utility/PDOclass.php");
 
 // DB接続情報
-$host = 'db'; // docker-composeのサービス名
+$host = 'db'; // docker-compose のサービス名
 $dbname = 'myapp';
-$user = 'myuser';
-$pass = 'mypass';
+$dbuser = 'myuser';
+$dbpass = 'mypass';
 
-// ユーザー入力（仮：POSTで受け取る）
+// ユーザー入力（POST）
 $username = $_POST['username'] ?? '';
 $password = $_POST['password'] ?? '';
 
-// 入力値チェック（ユーザーネームとパスワードが空でないか確認）
+// 入力チェック
 if (empty($username) || empty($password)) {
     echo 'ユーザーネームとパスワードは必須です。';
-    exit; // 処理をここで終了
+    exit;
 }
 
 // DB接続
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
-} catch (PDOException $e) {
-    die('DB接続失敗: ' . $e->getMessage());
-}
+$db = new Database($host, $dbname, $dbuser, $dbpass);
 
-// ユーザー名からパスワードを取得
+// SQLとバインドパラメータ
 $sql = "SELECT * FROM users WHERE username = :username";
-$stmt = $pdo->prepare($sql);
-$stmt->execute([':username' => $username]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
+$params = [
+    ':username' => [$username, PDO::PARAM_STR],
+];
 
-// ユーザーが存在し、パスワードが一致するか確認
+$user = $db->fetch($sql, $params);
+
+// パスワード照合（平文で保存されている前提／ハッシュなら password_verify を使う）
 if ($user && $user['password'] === $password) {
-    // セッション開始して、ログイン成功
-    $_SESSION['user_id'] = $user['id']; // ユーザーIDをセッションに保存
-    $_SESSION['username'] = $user['username']; // ユーザー名も保存
+    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['username'] = $user['username'];
     header('Location: top.php');
     exit;
 } else {
-    // ログイン失敗
     echo 'ユーザー名またはパスワードが間違っています';
 }
 ?>

@@ -1,6 +1,8 @@
 <?php
 session_start(); // セッション開始（これが一番上）
 
+require_once("utility/PDOclass.php"); // クラス読み込み
+
 // ログイン済みかどうか確認
 if (!isset($_SESSION['user_id'])) {
     die('ログインしていません。');
@@ -9,54 +11,53 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id']; // ログイン中のユーザーIDを取得
 
 // DB接続情報
-$host = 'db'; // docker-composeのサービス名
+$host = 'db';
 $dbname = 'myapp';
 $user = 'myuser';
 $pass = 'mypass';
 
-// // ユーザーID（仮に1とする、実際にはログインユーザーのIDを取得）
-// $user_id = 1;
-
 // 画像アップロード処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
     $file = $_FILES['image'];
-    $title = $_POST['title'] ?? '';  // タイトル
-    $comment = $_POST['comment'] ?? '';  // コメント
+    $title = $_POST['title'] ?? '';
+    $comment = $_POST['comment'] ?? '';
 
-    // ファイル名の設定
-    $fileName = bin2hex(random_bytes(16)) . '.' . pathinfo($file['name'], PATHINFO_EXTENSION); // ランダムなファイル名
-    $uploadDir = __DIR__ . '/uploads/'; // アップロード先ディレクトリのパス
-    $filePath = $uploadDir . $fileName;  // 保存先パス
+    // ランダムなファイル名生成
+    $fileName = bin2hex(random_bytes(16)) . '.' . pathinfo($file['name'], PATHINFO_EXTENSION);
+    $uploadDir = __DIR__ . '/uploads/';
+    $filePath = $uploadDir . $fileName;
     $filePath2 = '/uploads/' . $fileName;
 
-    // // アップロード先のディレクトリがなければ作成
-    // if (!is_dir($uploadDir)) {
-    //     if (!mkdir($uploadDir, 0777, true)) {
-    //         die('アップロードディレクトリの作成に失敗しました。');
-    //     }
-    // }
+    // アップロード先がなければ作成
+    if (!is_dir($uploadDir)) {
+        if (!mkdir($uploadDir, 0777, true)) {
+            die('アップロードディレクトリの作成に失敗しました。');
+        }
+    }
 
     // ファイルのアップロード
     if (move_uploaded_file($file['tmp_name'], $filePath)) {
         // DB接続
-        try {
-            $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
-        } catch (PDOException $e) {
-            die('DB接続失敗: ' . $e->getMessage());
-        }
+        $db = new Database($host, $dbname, $user, $pass);
 
         // DBに画像情報を保存
-        $sql = "INSERT INTO images (title, comment, file_name, file_path, user_id) VALUES (:title, :comment, :file_name, :file_path, :user_id)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ':title' => $title,
-            ':comment' => $comment,
-            ':file_name' => $fileName,
-            ':file_path' => $filePath2,
-            ':user_id' => $user_id
-        ]);
+        $sql = "INSERT INTO images (title, comment, file_name, file_path, user_id) 
+                VALUES (:title, :comment, :file_name, :file_path, :user_id)";
+        $params = [
+            ':title'     => [$title, PDO::PARAM_STR],
+            ':comment'   => [$comment, PDO::PARAM_STR],
+            ':file_name' => [$fileName, PDO::PARAM_STR],
+            ':file_path' => [$filePath2, PDO::PARAM_STR],
+            ':user_id'   => [$user_id, PDO::PARAM_INT],
+        ];
 
-        echo '画像がアップロードされました！';
+        $result = $db->execute($sql, $params);
+
+        if ($result > 0) {
+            echo '画像がアップロードされました！';
+        } else {
+            echo '画像情報の保存に失敗しました。';
+        }
     } else {
         echo '画像のアップロードに失敗しました。';
     }

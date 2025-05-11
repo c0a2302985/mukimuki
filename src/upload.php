@@ -54,12 +54,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
         $result = $db->execute($sql, $params);
 
         if ($result > 0) {
-            echo '画像がアップロードされました！';
+            header("Location: index.php"); // 自動でトップページに戻る
+            exit(); // 必ず exit を書くs
         } else {
-            echo '画像情報の保存に失敗しました。';
+            $_SESSION['error'] = '画像情報の保存に失敗しました。';
+            header("Location: upload_input.php");
+            exit();
         }
     } else {
-        echo '画像のアップロードに失敗しました。';
+        $_SESSION['error'] = '画像のアップロードに失敗しました。';
+        header("Location: upload_input.php");
+        exit;
     }
 }
 ?>

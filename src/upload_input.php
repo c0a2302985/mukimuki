@@ -19,6 +19,11 @@ if (!isset($_SESSION['user_id'])) {
 <h2>画像アップロード</h2>
 <p>ようこそ、<?php echo htmlspecialchars($_SESSION['username']); ?> さん！</p>
 
+<?php if (!empty($_SESSION['error'])): ?>
+    <p style="color: red;"><?php echo htmlspecialchars($_SESSION['error']); ?></p>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
+
 <form action="upload.php" method="POST" enctype="multipart/form-data">
     <label for="title">画像のタイトル：</label>
     <input type="text" name="title" id="title" required><br><br>

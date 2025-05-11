@@ -34,7 +34,7 @@ if ($result > 0) {
     // 登録成功 → ID取得 → セッション保存 → topへ
     $_SESSION['user_id'] = $db->lastInsertId();
     $_SESSION['username'] = $username;
-    header('Location: top.php');
+    header('Location: index.php');
     exit;
 } else {
     echo '登録失敗';

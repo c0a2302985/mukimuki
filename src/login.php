@@ -33,7 +33,7 @@ $user = $db->fetch($sql, $params);
 if ($user && $user['password'] === $password) {
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['username'] = $user['username'];
-    header('Location: top.php');
+    header('Location: index.php');
     exit;
 } else {
     echo 'ユーザー名またはパスワードが間違っています';

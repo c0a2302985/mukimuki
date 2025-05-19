@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'utility/PDOclass.php';
+require_once 'common.php';
 
 if (!isset($_SESSION['user_id'])) {
     die('ログインしてください。');
@@ -13,13 +13,13 @@ if (!isset($_GET['id'])) {
 $image_id = (int) $_GET['id'];
 $user_id = $_SESSION['user_id'];
 
-// DB接続情報
-$host = 'db';
-$dbname = 'myapp';
-$user = 'myuser';
-$pass = 'mypass';
+// // DB接続情報
+// $host = 'db';
+// $dbname = 'myapp';
+// $user = 'myuser';
+// $pass = 'mypass';
 
-$db = new Database($host, $dbname, $user, $pass);
+// $db = new Database($host, $dbname, $user, $pass);
 
 // 本人の画像か確認
 $sql = "SELECT file_name FROM images WHERE :id AND :user_id";

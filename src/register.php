@@ -1,13 +1,13 @@
 <?php
 session_start(); // セッション開始
 
-require_once("utility/PDOclass.php");
+require_once "common.php";
 
-// DB接続情報
-$host = 'db';
-$dbname = 'myapp';
-$user = 'myuser';
-$pass = 'mypass';
+// // DB接続情報
+// $host = 'db';
+// $dbname = 'myapp';
+// $user = 'myuser';
+// $pass = 'mypass';
 
 // ユーザー入力（POST）
 $username = $_POST['username'] ?? '';
@@ -19,8 +19,8 @@ if (empty($username) || empty($password)) {
     exit;
 }
 
-// DB接続
-$db = new Database($host, $dbname, $user, $pass);
+// // DB接続
+// $db = new Database($host, $dbname, $user, $pass);
 
 // ユーザー登録処理
 $sql = "INSERT INTO users (username, password) VALUES (:username, :password)";

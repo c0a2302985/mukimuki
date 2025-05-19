@@ -1,21 +1,21 @@
 <?php
 session_start(); // セッション開始
 
-require_once 'utility/PDOclass.php'; // Database クラス読み込み
+require_once 'common.php'; // Database クラス読み込み
 
 // ログインしていない場合はアクセス拒否
 if (!isset($_SESSION['user_id'])) {
     die('ログインしていません。先にログインしてください。');
 }
 
-// DB接続情報
-$host = 'db';
-$dbname = 'myapp';
-$user = 'myuser';
-$pass = 'mypass';
-
-// Database クラスのインスタンス生成
-$db = new Database($host, $dbname, $user, $pass);
+// // DB接続情報
+// $host = 'db';
+// $dbname = 'myapp';
+// $user = 'myuser';
+// $pass = 'mypass';
+// 
+// // Database クラスのインスタンス生成
+// $db = new Database($host, $dbname, $user, $pass);
 
 // 検索キーワードの取得
 $title_search = $_GET['title_search'] ?? '';

@@ -1,12 +1,12 @@
 <?php
 session_start();
-require_once("utility/PDOclass.php");
+require_once("common.php");
 
-// DB接続情報
-$host = 'db'; // docker-compose のサービス名
-$dbname = 'myapp';
-$dbuser = 'myuser';
-$dbpass = 'mypass';
+// // DB接続情報
+// $host = 'db'; // docker-compose のサービス名
+// $dbname = 'myapp';
+// $dbuser = 'myuser';
+// $dbpass = 'mypass';
 
 // ユーザー入力（POST）
 $username = $_POST['username'] ?? '';
@@ -18,8 +18,8 @@ if (empty($username) || empty($password)) {
     exit;
 }
 
-// DB接続
-$db = new Database($host, $dbname, $dbuser, $dbpass);
+// // DB接続
+// $db = new Database($host, $dbname, $dbuser, $dbpass);
 
 // SQLとバインドパラメータ
 $sql = "SELECT * FROM users WHERE username = :username";

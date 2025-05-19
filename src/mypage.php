@@ -1,7 +1,7 @@
 <?php
 session_start(); // セッション開始
 
-require_once 'utility/PDOclass.php'; // Database クラス読み込み
+require_once 'common.php'; // Database クラス読み込み
 
 if (!isset($_SESSION['user_id'])) {
     die('ログインしていません。先にログインしてください。');
@@ -9,12 +9,12 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-$host = 'db';
-$dbname = 'myapp';
-$user = 'myuser';
-$pass = 'mypass';
+// $host = 'db';
+// $dbname = 'myapp';
+// $user = 'myuser';
+// $pass = 'mypass';
 
-$db = new Database($host, $dbname, $user, $pass);
+// $db = new Database($host, $dbname, $user, $pass);
 
 $sql = "SELECT * FROM images WHERE user_id = :user_id ORDER BY uploaded_at DESC";
 

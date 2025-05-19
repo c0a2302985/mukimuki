@@ -13,6 +13,14 @@ class Database
     
     private     $pdo;
     private     $stmt;
+
+    private function logError($e, $context = '')
+    {
+        $message = '[' . date('Y-m-d H:i:s') . "] ";
+        $message .= $context . ' - ' . $e->getMessage() . "\n";
+        file_put_contents(__DIR__ . '/error.log', $message, FILE_APPEND);
+    }
+
     
     /**********************************************************
       関数  ：__construct
@@ -41,7 +49,8 @@ class Database
         }
         catch (PDOException $e)
         {
-            // pass
+            $this->logError($e, 'DB接続失敗');
+            throw new Exception("データベース接続に失敗しました。"); // 安全なメッセージ
         }
     }
    
@@ -72,7 +81,7 @@ class Database
             {
                 // 以下例外処理例:
                 // throw new InvalidArgumentException("パラメータは ['値', 型] の形式で指定してください。key=$key");
-                exit();
+                throw new InvalidArgumentException("バインドパラメータが不正です。key=$key");
             }
 
             [$value, $type] = $param;
@@ -113,7 +122,8 @@ class Database
         }
         catch(PDOException $e)
         {
-            exit();
+            $this->logError($e, "SQLエラー: $sql");
+            throw new Exception("データベース処理中にエラーが発生しました。");
         }
         
         return      false;

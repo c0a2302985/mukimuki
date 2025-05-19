@@ -1,41 +1,31 @@
 <?php
 session_start();
-require_once("common.php");
-
-// // DB接続情報
-// $host = 'db'; // docker-compose のサービス名
-// $dbname = 'myapp';
-// $dbuser = 'myuser';
-// $dbpass = 'mypass';
-
-// ユーザー入力（POST）
-$username = $_POST['username'] ?? '';
-$password = $_POST['password'] ?? '';
-
-// 入力チェック
-if (empty($username) || empty($password)) {
-    echo 'ユーザーネームとパスワードは必須です。';
-    exit;
+if (!isset($_SESSION['csrf_token'])) {
+    // トークン生成
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
-
-// // DB接続
-// $db = new Database($host, $dbname, $dbuser, $dbpass);
-
-// SQLとバインドパラメータ
-$sql = "SELECT * FROM users WHERE username = :username";
-$params = [
-    ':username' => [$username, PDO::PARAM_STR],
-];
-
-$user = $db->fetch($sql, $params);
-
-// パスワード照合（平文で保存されている前提／ハッシュなら password_verify を使う）
-if ($user && $user['password'] === $password) {
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['username'] = $user['username'];
-    header('Location: index.php');
-    exit;
-} else {
-    echo 'ユーザー名またはパスワードが間違っています';
-}
+$token = $_SESSION['csrf_token'];
 ?>
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <title>Login</title>
+</head>
+<body>
+    <?php
+    if (!empty($_SESSION['login_error'])) {
+        echo '<p style="color:red;">' . htmlspecialchars($_SESSION['login_error'], ENT_QUOTES, 'UTF-8') . '</p>';
+        unset($_SESSION['login_error']);
+    }
+    ?>
+    <form action="login_process.php" method="post">
+        <input type="hidden" name="csrf_token" value="<?php echo $token; ?>" />
+        ユーザー名: <input type="text" name="username" required><br>
+        パスワード: <input type="password" name="password" required><br>
+        <input type="submit" value="ログイン">
+        <a href="register.php">register</a>
+    </form>
+</body>
+</html>

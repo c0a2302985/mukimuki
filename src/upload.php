@@ -5,16 +5,20 @@ require_once("common.php"); // クラス読み込み
 
 // ログイン済みかどうか確認
 if (!isset($_SESSION['user_id'])) {
-    die('ログインしていません。');
+    header('Location: login.php');
+    exit;
 }
 
 $user_id = $_SESSION['user_id']; // ログイン中のユーザーIDを取得
 
-// // DB接続情報
-// $host = 'db';
-// $dbname = 'myapp';
-// $user = 'myuser';
-// $pass = 'mypass';
+// CSRFトークン検証
+if (
+    !isset($_POST['csrf_token']) ||
+    !isset($_SESSION['csrf_token']) ||
+    $_POST['csrf_token'] !== $_SESSION['csrf_token']
+) {
+    die('不正なリクエスト（トークン不一致）です。');
+}
 
 // 画像アップロード処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
@@ -37,8 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
 
     // ファイルのアップロード
     if (move_uploaded_file($file['tmp_name'], $filePath)) {
-        // // DB接続
-        // $db = new Database($host, $dbname, $user, $pass);
 
         // DBに画像情報を保存
         $sql = "INSERT INTO images (title, comment, file_name, file_path, user_id) 

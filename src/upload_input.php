@@ -3,8 +3,15 @@ session_start();
 
 // ログインしていない場合はアクセス拒否
 if (!isset($_SESSION['user_id'])) {
-    die('ログインしていません。先にログインしてください。');
+    header('Location: login.php');
+    exit;
 }
+
+// CSRFトークン生成
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrf_token = $_SESSION['csrf_token'];
 ?>
 
 <!DOCTYPE html>
@@ -25,6 +32,8 @@ if (!isset($_SESSION['user_id'])) {
 <?php endif; ?>
 
 <form action="upload.php" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+
     <label for="title">画像のタイトル：</label>
     <input type="text" name="title" id="title" required><br><br>
 

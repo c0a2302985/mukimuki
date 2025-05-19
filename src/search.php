@@ -5,22 +5,14 @@ require_once 'common.php'; // Database クラス読み込み
 
 // ログインしていない場合はアクセス拒否
 if (!isset($_SESSION['user_id'])) {
-    die('ログインしていません。先にログインしてください。');
+    header('Location: login.php');
+    exit;
 }
 
-// // DB接続情報
-// $host = 'db';
-// $dbname = 'myapp';
-// $user = 'myuser';
-// $pass = 'mypass';
-// 
-// // Database クラスのインスタンス生成
-// $db = new Database($host, $dbname, $user, $pass);
-
 // 検索キーワードの取得
-$title_search = $_GET['title_search'] ?? '';
-$comment_search = $_GET['comment_search'] ?? '';
-$username_search = $_GET['username_search'] ?? '';
+$title_search = trim($_GET['title_search'] ?? '');
+$comment_search = trim($_GET['comment_search'] ?? '');
+$username_search = trim($_GET['username_search'] ?? '');
 
 // 検索用SQL
 $sql = "SELECT images.*, users.username FROM images 

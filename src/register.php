@@ -1,42 +1,30 @@
 <?php
-session_start(); // セッション開始
-
-require_once "common.php";
-
-// // DB接続情報
-// $host = 'db';
-// $dbname = 'myapp';
-// $user = 'myuser';
-// $pass = 'mypass';
-
-// ユーザー入力（POST）
-$username = $_POST['username'] ?? '';
-$password = $_POST['password'] ?? '';
-
-// 入力値チェック
-if (empty($username) || empty($password)) {
-    echo 'ユーザーネームとパスワードは必須です。';
-    exit;
+session_start();
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
-
-// // DB接続
-// $db = new Database($host, $dbname, $user, $pass);
-
-// ユーザー登録処理
-$sql = "INSERT INTO users (username, password) VALUES (:username, :password)";
-$params = [
-    ':username' => [$username, PDO::PARAM_STR],
-    ':password' => [$password, PDO::PARAM_STR],
-];
-$result = $db->execute($sql, $params);
-
-if ($result > 0) {
-    // 登録成功 → ID取得 → セッション保存 → topへ
-    $_SESSION['user_id'] = $db->lastInsertId();
-    $_SESSION['username'] = $username;
-    header('Location: index.php');
-    exit;
-} else {
-    echo '登録失敗';
-}
+$token = $_SESSION['csrf_token'];
 ?>
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <title>Register</title>
+</head>
+<body>
+    <?php
+    if (!empty($_SESSION['register_error'])) {
+        echo '<p style="color:red;">' . htmlspecialchars($_SESSION['register_error'], ENT_QUOTES, 'UTF-8') . '</p>';
+        unset($_SESSION['register_error']);
+    }
+    ?>
+    <form action="register_process.php" method="post">
+        <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
+        ユーザー名: <input type="text" name="username" required><br>
+        パスワード: <input type="password" name="password" required><br>
+        <input type="submit" value="登録">
+        <a href="login.php">ログイン</a>
+    </form>
+</body>
+</html>

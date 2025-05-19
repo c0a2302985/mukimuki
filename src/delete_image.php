@@ -2,27 +2,28 @@
 session_start();
 require_once 'common.php';
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die('不正なアクセスです。');
+}
+
 if (!isset($_SESSION['user_id'])) {
     die('ログインしてください。');
 }
 
-if (!isset($_GET['id'])) {
+// CSRFトークン検証
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    die('不正なトークンです。');
+}
+
+if (!isset($_POST['id'])) {
     die('画像IDが指定されていません。');
 }
 
-$image_id = (int) $_GET['id'];
+$image_id = (int) $_POST['id'];
 $user_id = $_SESSION['user_id'];
 
-// // DB接続情報
-// $host = 'db';
-// $dbname = 'myapp';
-// $user = 'myuser';
-// $pass = 'mypass';
-
-// $db = new Database($host, $dbname, $user, $pass);
-
 // 本人の画像か確認
-$sql = "SELECT file_name FROM images WHERE :id AND :user_id";
+$sql = "SELECT file_name FROM images WHERE id = :id AND user_id = :user_id";
 $params = [
     ':id' => [$image_id, PDO::PARAM_INT],
     ':user_id' => [$user_id, PDO::PARAM_INT]
@@ -35,16 +36,15 @@ if (!$result) {
 
 $filename = $result['file_name'];
 
-// データベースから削除
-$sql = "DELETE FROM images WHERE :id AND :user_id";
+// DBとファイル削除
+$sql = "DELETE FROM images WHERE id = :id AND user_id = :user_id";
 $db->execute($sql, $params);
 
-// サーバー上のファイルも削除
 $image_path = 'uploads/' . $filename;
 if (file_exists($image_path)) {
     unlink($image_path);
 }
 
-// ✅ マイページにリダイレクト
 header("Location: mypage.php");
 exit;
+?>

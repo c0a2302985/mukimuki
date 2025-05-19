@@ -203,6 +203,11 @@ class Database
     public function commit() {
         return $this->pdo->commit();
     }
+
+    public function fetchColumn(string $sql, array $params = []): mixed {
+        $this->execute($sql, $params);
+        return $this->stmt->fetchColumn();
+    }
     
     /**********************************************************/
 

@@ -1,16 +1,10 @@
 <?php
 require_once 'common.php'; // Database クラスの読み込み
 
-// $host = 'db';
-// $dbname = 'myapp';
-// $user = 'myuser';
-// $pass = 'mypass';
-
-// try {
-//     $db = new Database($host, $dbname, $user, $pass); // Database クラスのインスタンス作成
-// } catch (PDOException $e) {
-//     die('DB接続失敗: ' . $e->getMessage());
-// }
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
 
 // 画像情報を取得するSQLクエリ
 $sql = "SELECT * FROM images ORDER BY uploaded_at DESC"; // 画像の最新順に取得
